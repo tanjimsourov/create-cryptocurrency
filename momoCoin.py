@@ -126,13 +126,37 @@ def mine_block():
                 'transactions':block['transactions']}
     return jsonify(response), 200
 
-#creating full blockchain
+#getting full blockchain
 @app.route('/get_chain', methods=['GET'])
 def get_chain():
     response = {'chain':blockchain.chain,
                 'length': len(blockchain.chain)}
     
     return jsonify(response), 200
+
+
+#Checking if blockchain is valid
+@app.route('/is_valid', methods=['GET'])
+def is_valid():
+    is_valid = blockchain.is_chain_valid(blockchain.chain)
+    if is_valid:
+        response ={'message':'All good!'}
+    else:
+        response ={'message':'non valid'}
+    return jsonify(response), 200
+
+#adding a new transaction to the blockchain 
+@app.route('/add_transaction', methods=['POST'])
+def add_transaction():
+    json = request.get_json()
+    transaction_keys = ['sender','receiver','amount']
+    if not all (key in json for key in transaction_keys):
+        return 'Some elements are missing', 400
+    index = blockchain.add_transaction(json['sender'],json['receiver'], json['amount'])
+    response = {'message':f'This transaction will be added to block {index}'}
+    return jsonify(response), 201
+
+
 
 #Decentralizing blockchain
 #running app
